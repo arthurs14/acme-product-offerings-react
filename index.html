@@ -18,25 +18,26 @@
         <script type='text/babel'>
             const { render } = ReactDOM;
             const { Component } = React;
-            const { HashRouter, Link, Route } = ReactRouterDOM; 
+            const { HashRouter, Link, Route, Redirect, Switch } = ReactRouterDOM;
             const root = document.querySelector('#root');
 
             const Nav = ({ products, companies }) => {
                 return(
                     <div className='nav'>
+                        <div>Acme Product Offerings</div>
                         <Link to='/companies'>Companies({companies.length})</Link>
                         <Link to='/products'>Products({products.length})</Link>
                     </div>
                 )
             }
+
             const Companies = ({ companies }) => {
-                console.log(companies)
                 return(
                     <div>
                         <h1>Companies</h1>
                         <ul>
                             {
-                                companies.map(company => 
+                                companies.map(company =>
                                 <li key={company.id}>
                                 {company.name}
                                 <div>{company.catchPhrase}</div>
@@ -44,7 +45,10 @@
                                 Offering:
                                 <ul>
                                 {
-                                    company.offerings.map(product => <li key={product.product.id}>{product.product.name} {product.price.toFixed(2)}</li>)
+                                    company.offerings.map(product =>
+                                        <li key={product.product.id}>
+                                            {product.product.name} {product.price.toFixed(2)}
+                                        </li>)
                                 }
                                 </ul>
                                 </div>
@@ -55,14 +59,13 @@
                 );
             }
 
-            const Products = ({ products }) => {
-                console.log(products[0].companies)
+            const Products = ({ products }) => {;
                 return(
                     <div>
                         <h1>Products</h1>
                         <ul>
                         {
-                            products.map(product => 
+                            products.map(product =>
                             <li key={product.id}>
                             {product.name}
                             <div>${product.suggestedPrice.toFixed(2)}</div>
@@ -70,18 +73,22 @@
                             <div>
                             Offered By:
                             <ul>
-                            
+                                {
+                                    product.companies.map(company =>
+                                        <li key={company.company.id}>
+                                            {company.company.name}
+                                        </li>)
+                                }
                             </ul>
                             </div>
                             </li>)
                         }
                         </ul>
                     </div>
-                    
-                    
+
+
                 );
             }
-
 
             class App extends Component {
                 constructor() {
@@ -98,7 +105,9 @@
                         'https://acme-users-api-rev.herokuapp.com/api/offerings'
                     ]
                     const responses = await Promise.all(urls.map(url => axios.get(url)));
+
                     const [products, companies, offerings] = responses.map( response => response.data );
+
                     const _companies = companies.map(_company => {
                         const offers = offerings.filter( offer => {
                             return offer.companyId === _company.id;
@@ -111,6 +120,7 @@
                         })
                         return {..._company, offerings: _products}
                     })
+
                     const _products = products.map( product => {
                         const offers = offerings.filter( offer => {
                            return product.id === offer.productId;
@@ -129,23 +139,17 @@
                     const { products, companies } = this.state;
                     return (
                         <HashRouter>
-                        <div>
                             <Route render= { () => <Nav products={ products } companies={ companies }/> }/>
-                            <Route exact path= '/companies' render= { () => <Companies companies={companies} /> } />
-                            <Route path= '/products' render= { () => <Products products={products} /> } />
-                        </div>
+                            <Switch>
+                                <Route exact path= '/companies' render= { () => <Companies companies={companies} /> } />
+                                <Route path= '/products' render= { () => <Products products={products} /> } />
+                                <Redirect to='/companies' />
+                            </Switch>
                         </HashRouter>
                     )
-
-                    
                 }
             }
             render(<App />, root)
-
-
-
-
-
         </script>
     </body>
 </html>
