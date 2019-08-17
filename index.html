@@ -17,6 +17,14 @@
             const { HashRouter, Link, Route } = ReactRouterDOM; 
             const root = document.querySelector('#root');
 
+            const Nav = () => {
+                return(
+                    <div className='nav'>
+                        <Link to='/companies'>Companies</Link>
+                        <Link to='/products'>Products</Link>
+                    </div>
+                )
+            }
             const Companies = () => {
                 return(
                     <h1>Companies</h1>
@@ -28,6 +36,7 @@
                     <h1>Products</h1>
                 );
             }
+
 
             class App extends Component {
                 constructor() {
@@ -46,10 +55,17 @@
                     ]
                     const responses = await Promise.all(urls.map(url => axios.get(url)));
                     const [products, companies, offerings] = responses.map( response => response.data );
-                    console.log(products, companies, offerings)
+                    this.setState({ products, companies, offerings })
                 }
                 render() {
-                    return <hr/>
+                    const { products, companies, offerings } = this.state;
+                    return (
+                        <HashRouter>
+                        <div>
+                            <Route component = { Nav }/>
+                        </div>
+                        </HashRouter>
+                    )
 
                     
                 }
