@@ -7,6 +7,10 @@
             <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js"></script>
         <style>
+            .nav{
+                display: flex;
+                justify-content: space-around;
+            }
         </style>
     </head>
     <body>
@@ -17,11 +21,11 @@
             const { HashRouter, Link, Route } = ReactRouterDOM; 
             const root = document.querySelector('#root');
 
-            const Nav = () => {
+            const Nav = ({ products, companies }) => {
                 return(
                     <div className='nav'>
-                        <Link to='/companies'>Companies</Link>
-                        <Link to='/products'>Products</Link>
+                        <Link to='/companies'>Companies({companies.length})</Link>
+                        <Link to='/products'>Products({products.length})</Link>
                     </div>
                 )
             }
@@ -43,8 +47,7 @@
                     super();
                     this.state = {
                         products: [],
-                        companies: [],
-                        offerings: [],
+                        companies: []
                     }
                 }
                 async componentDidMount() {
@@ -55,14 +58,30 @@
                     ]
                     const responses = await Promise.all(urls.map(url => axios.get(url)));
                     const [products, companies, offerings] = responses.map( response => response.data );
-                    this.setState({ products, companies, offerings })
+                    const _companies = companies.map(company => {
+                        const offers = offerings.filter( offer => {
+                            return offer.companyId === company.id;
+                        })
+                        return {...company, offerings: offers}
+                    })
+                    const _products = products.map( product => {
+                        const offers = offerings.filter( offer => {
+                            return offer.productId === product.id;
+                        })
+                        return {...product, companies: offers}
+                    })
+                    
+                    console.log(_products)
+                    this.setState({ products, companies })
                 }
                 render() {
-                    const { products, companies, offerings } = this.state;
+                    const { products, companies } = this.state;
                     return (
                         <HashRouter>
                         <div>
-                            <Route component = { Nav }/>
+                            <Route render= { () => <Nav products={ products } companies={ companies }/> }/>
+                            <Route exact path= '/companies' component= { Companies } />
+                            <Route path= '/products' component= { Products } />
                         </div>
                         </HashRouter>
                     )
