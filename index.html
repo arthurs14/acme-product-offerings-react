@@ -11,6 +11,9 @@
                 display: flex;
                 justify-content: space-around;
             }
+            .selected {
+                background-color: tomato;
+            }
         </style>
     </head>
     <body>
@@ -21,12 +24,12 @@
             const { HashRouter, Link, Route, Redirect, Switch } = ReactRouterDOM;
             const root = document.querySelector('#root');
 
-            const Nav = ({ products, companies }) => {
+            const Nav = ({ products, companies, path }) => {
                 return(
                     <div className='nav'>
                         <div>Acme Product Offerings</div>
-                        <Link to='/companies'>Companies({companies.length})</Link>
-                        <Link to='/products'>Products({products.length})</Link>
+                        <Link to='/companies' className={path === '/companies' ? 'selected' : ''}>Companies({companies.length})</Link>
+                        <Link to='/products' className={path === '/products' ? 'selected' : ''}>Products({products.length})</Link>
                     </div>
                 )
             }
@@ -139,7 +142,7 @@
                     const { products, companies } = this.state;
                     return (
                         <HashRouter>
-                            <Route render= { () => <Nav products={ products } companies={ companies }/> }/>
+                            <Route render= { (props) => <Nav products={ products } companies={ companies} path={ props.location.pathname } /> }/>
                             <Switch>
                                 <Route exact path= '/companies' render= { () => <Companies companies={companies} /> } />
                                 <Route path= '/products' render= { () => <Products products={products} /> } />
