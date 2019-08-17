@@ -29,15 +29,36 @@
                     </div>
                 )
             }
-            const Companies = () => {
+            const Companies = ({ companies }) => {
+                console.log(companies)
                 return(
-                    <h1>Companies</h1>
+                    <div>
+                        <h1>Companies</h1>
+                        <ul>
+                            {
+                                companies.map(company => 
+                                <li key={company.id}>
+                                {company.name}
+                                <div>{company.catchPhrase}</div>
+                                <div>
+                                Offering:
+                                <ul>
+                                {
+                                    company.offerings.map(product => <li key={product.product.id}>{product.product.name} {product.price.toFixed(2)}</li>)
+                                }
+                                </ul>
+                                </div>
+                                </li>)
+                            }
+                        </ul>
+                    </div>
                 );
             }
 
             const Products = () => {
                 return(
                     <h1>Products</h1>
+                    
                 );
             }
 
@@ -58,21 +79,31 @@
                     ]
                     const responses = await Promise.all(urls.map(url => axios.get(url)));
                     const [products, companies, offerings] = responses.map( response => response.data );
-                    const _companies = companies.map(company => {
+                    const _companies = companies.map(_company => {
                         const offers = offerings.filter( offer => {
-                            return offer.companyId === company.id;
+                            return offer.companyId === _company.id;
                         })
-                        return {...company, offerings: offers}
+                        const _products = offers.map(offer => {
+                            const findProduct = products.find(product => {
+                                return offer.productId === product.id;
+                            })
+                            return {...offer, product: findProduct}
+                        })
+                        return {..._company, offerings: _products}
                     })
                     const _products = products.map( product => {
                         const offers = offerings.filter( offer => {
-                            return offer.productId === product.id;
+                           return product.id === offer.productId;
                         })
-                        return {...product, companies: offers}
+                        const _companies = offers.map( offer => {
+                            const findCompany = companies.find(company => {
+                                return offer.companyId === company.id
+                            })
+                            return {...offer, company: findCompany}
+                        })
+                        return {...product, companies: _companies}
                     })
-                    
-                    console.log(_products)
-                    this.setState({ products, companies })
+                    this.setState({ products: _products, companies: _companies })
                 }
                 render() {
                     const { products, companies } = this.state;
@@ -80,7 +111,7 @@
                         <HashRouter>
                         <div>
                             <Route render= { () => <Nav products={ products } companies={ companies }/> }/>
-                            <Route exact path= '/companies' component= { Companies } />
+                            <Route exact path= '/companies' render= { () => <Companies companies={companies} /> } />
                             <Route path= '/products' component= { Products } />
                         </div>
                         </HashRouter>
