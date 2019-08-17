@@ -55,9 +55,29 @@
                 );
             }
 
-            const Products = () => {
+            const Products = ({ products }) => {
+                console.log(products[0].companies)
                 return(
-                    <h1>Products</h1>
+                    <div>
+                        <h1>Products</h1>
+                        <ul>
+                        {
+                            products.map(product => 
+                            <li key={product.id}>
+                            {product.name}
+                            <div>${product.suggestedPrice.toFixed(2)}</div>
+                            <div>{product.description}</div>
+                            <div>
+                            Offered By:
+                            <ul>
+                            
+                            </ul>
+                            </div>
+                            </li>)
+                        }
+                        </ul>
+                    </div>
+                    
                     
                 );
             }
@@ -112,7 +132,7 @@
                         <div>
                             <Route render= { () => <Nav products={ products } companies={ companies }/> }/>
                             <Route exact path= '/companies' render= { () => <Companies companies={companies} /> } />
-                            <Route path= '/products' component= { Products } />
+                            <Route path= '/products' render= { () => <Products products={products} /> } />
                         </div>
                         </HashRouter>
                     )
